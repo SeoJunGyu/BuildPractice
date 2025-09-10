@@ -3,7 +3,6 @@ using UnityEngine.EventSystems;
 
 public class VirtualJoyStick : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
-    public Rigidbody target;
     public float speed = 5f;
 
     public RectTransform background; //조이스틱 영역
@@ -14,13 +13,13 @@ public class VirtualJoyStick : MonoBehaviour, IDragHandler, IBeginDragHandler, I
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        
+
     }
 
     public void OnDrag(PointerEventData eventData)
     {
         var touchPosition = eventData.position; //스크린 좌표계 기준이다.
-        if(RectTransformUtility.ScreenPointToLocalPointInRectangle(
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
             background, touchPosition, eventData.enterEventCamera, out Vector2 position
             ))
         {
@@ -45,7 +44,7 @@ public class VirtualJoyStick : MonoBehaviour, IDragHandler, IBeginDragHandler, I
 
     private void Update()
     {
-        Debug.Log(Input);
-        
+        //Debug.Log(Input);
+
     }
 }

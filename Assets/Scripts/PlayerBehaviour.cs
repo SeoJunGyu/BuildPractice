@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+//using UnityEngine.InputSystem;
 
 /// <summary> 
 /// Responsible for moving the player automatically and 
@@ -37,9 +38,15 @@ public class PlayerBehaviour : MonoBehaviour
     private float scaleRate = 1f;
     public float zoomSpeed = 1f;
 
+    public VirtualJoyStick joystick;
+
     // Start is called before the first frame update
     void Start()
     {
+#if DEF_DEV
+        Debug.unityLogger.logEnabled = false; //로그를 안찍는다는 설정 / 기본은 true이다.
+#endif
+
         // Get access to our Rigidbody component 
         rb = GetComponent<Rigidbody>();
 
@@ -49,7 +56,7 @@ public class PlayerBehaviour : MonoBehaviour
     private void Update()
     {
         //모든 터치 계속 순회
-        foreach(Touch touch in Input.touches)
+        foreach (Touch touch in Input.touches)
         {
             switch (touch.phase)
             {
@@ -67,22 +74,22 @@ public class PlayerBehaviour : MonoBehaviour
                     break;
                 case TouchPhase.Ended:
                 case TouchPhase.Canceled:
-                    if(fingerId == touch.fingerId) //현재 터치와 땠을때 같다면 리셋한다.
+                    if (fingerId == touch.fingerId) //현재 터치와 땠을때 같다면 리셋한다.
                     {
                         float distance = Vector2.Distance(touch.position, fingerTouchStartPosition); //땐 터치 위치와 시작 위치 거리 반환
                         float time = Time.time - fingerTouchStartTime; //현재 시간과 시작시간의 차이
 
-                        if(distance > minSwipeDistancePixels && time < maxSwipeTime) //방향은 모르겠지만 스와이프 조건에 만족했다.
+                        if (distance > minSwipeDistancePixels && time < maxSwipeTime) //방향은 모르겠지만 스와이프 조건에 만족했다.
                         {
                             Vector2 direction = touch.position - fingerTouchStartPosition; //방향구하기
                             direction.Normalize();
 
                             Vector3 direction3 = direction.x > 0f ? Vector3.right : Vector3.left;
-                            if(!rb.SweepTest(direction3, out RaycastHit hit, sweepDistance)) //리지드바디가 있는 콜라이더의 범위만큼의 레이를 충돌검사하는 함수다.
+                            if (!rb.SweepTest(direction3, out RaycastHit hit, sweepDistance)) //리지드바디가 있는 콜라이더의 범위만큼의 레이를 충돌검사하는 함수다.
                             {
                                 rb.MovePosition(rb.position + direction3 * sweepDistance);
                             }
-                            
+
                         }
 
                         fingerId = -1;
@@ -93,7 +100,7 @@ public class PlayerBehaviour : MonoBehaviour
             }
         }
 
-        if(Input.touchCount == 2)
+        if (Input.touchCount == 2)
         {
             Touch touch = Input.GetTouch(0);
             Touch touch2 = Input.GetTouch(1);
@@ -115,7 +122,7 @@ public class PlayerBehaviour : MonoBehaviour
         {
             Touch touch = Input.GetTouch(0);
             var ray = Camera.main.ScreenPointToRay(touch.position);
-            if(Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore)) //~0 : 0의 보수니까 전부 1인 레이어만 찾겠다는 것이다.
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore)) //~0 : 0의 보수니까 전부 1인 레이어만 찾겠다는 것이다.
             {
                 //hit.collider.gameObject.SetActive(false);
                 //SendMessageOptions.DontRequireReceiver : 
@@ -143,13 +150,13 @@ public class PlayerBehaviour : MonoBehaviour
         if (Input.touchCount == 1)
         {
             //Input.touchCount[0] = 0;
-            Touch touch = Input.GetTouch(0);
-            var viewportPos = Camera.main.ScreenToViewportPoint(touch.position); ////touch.position : 터치된 좌표
-            horizontalSpeed = viewportPos.x < 0.5 ? -1f : 1f;
-            horizontalSpeed *= dodgeSpeed;
+            //Touch touch = Input.GetTouch(0);
+            //var viewportPos = Camera.main.ScreenToViewportPoint(touch.position); ////touch.position : 터치된 좌표
+            //horizontalSpeed = viewportPos.x < 0.5 ? -1f : 1f;
+            //horizontalSpeed *= dodgeSpeed;
         }
 #endif
-
+        horizontalSpeed = dodgeSpeed * joystick.Input.x;
         rb.AddForce(horizontalSpeed, 0, rollSpeed);
     }
 }
